@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35208.52
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScratchTest", "ScratchTest\ScratchTest.csproj", "{94600F65-DA95-4B91-90CE-A29FCA2511BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "View", "ScratchView\View.csproj", "{1C34775C-F963-40B6-A2D2-8FA4DB0B62AE}"
@@ -11,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewSupport", "ViewSupport\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScratchUtility", "ScratchUtility\ScratchUtility.csproj", "{CDE77802-BC53-474C-9EF8-72E856110897}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileParser", "FileParser\FileParser.csproj", "{BEDD5A1D-5BFF-4C52-80DB-9492D746C9C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileParser", "FileParser\FileParser.csproj", "{8C0AFEC7-4AF1-45A0-A9AD-BFAAC0CD16A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,12 +41,15 @@ Global
 		{CDE77802-BC53-474C-9EF8-72E856110897}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDE77802-BC53-474C-9EF8-72E856110897}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDE77802-BC53-474C-9EF8-72E856110897}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BEDD5A1D-5BFF-4C52-80DB-9492D746C9C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BEDD5A1D-5BFF-4C52-80DB-9492D746C9C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BEDD5A1D-5BFF-4C52-80DB-9492D746C9C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BEDD5A1D-5BFF-4C52-80DB-9492D746C9C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C0AFEC7-4AF1-45A0-A9AD-BFAAC0CD16A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C0AFEC7-4AF1-45A0-A9AD-BFAAC0CD16A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C0AFEC7-4AF1-45A0-A9AD-BFAAC0CD16A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C0AFEC7-4AF1-45A0-A9AD-BFAAC0CD16A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7B1CF71-0989-45DD-8DE4-4A88CF998C79}
 	EndGlobalSection
 EndGlobal
