@@ -13,7 +13,7 @@ namespace ScratchUtility
         public double Z { get; set; }
 
         public Coord(double x, double y, double z)
-            :this()
+            : this()
         {
             X = x;
             Y = y;
@@ -21,7 +21,7 @@ namespace ScratchUtility
         }
 
         public Coord(double x, double y)
-            :this()
+            : this()
         {
             X = x;
             Y = y;
@@ -32,22 +32,27 @@ namespace ScratchUtility
         {
             return new Coord(c.X * rhs, c.Y * rhs, c.Z * rhs);
         }
+
         public static Coord operator *(double lhs, Coord c)
         {
             return c * lhs;
         }
+
         public static Coord operator /(Coord c, double rhs)
         {
             return new Coord(c.X / rhs, c.Y / rhs, c.Z / rhs);
         }
+
         public static Coord operator -(Coord c, Coord rhs)
         {
             return new Coord(c.X - rhs.X, c.Y - rhs.Y, c.Z - rhs.Z);
         }
+
         public static Coord operator +(Coord c, Coord rhs)
         {
             return new Coord(c.X + rhs.X, c.Y + rhs.Y, c.Z + rhs.Z);
         }
+
         public static bool operator ==(Coord a, Coord b)
         {
             // If both are null, or both are same instance, return true.
@@ -78,18 +83,20 @@ namespace ScratchUtility
                 return this == (Coord)obj;
             }
             else
+            {
                 return false;
+            }
         }
 
         public override string ToString()
         {
             return "(" + X + ", " + Y + ", " + Z + ")";
         }
+
         public string ToString(int decimalPlaces)
         {
             return "(" + X.ToString("N" + decimalPlaces) + ", " + Y.ToString("N" + decimalPlaces) + ", " + Z.ToString("N" + decimalPlaces) + ")";
         }
-
 
         public Matrix ToVectorCol(bool includeBottom1)
         {
@@ -110,13 +117,13 @@ namespace ScratchUtility
                 v[2, 0] = Z;
                 return v;
             }
-
         }
 
         public double Length
         {
             get { return Math.Sqrt(X * X + Y * Y + Z * Z); }
         }
+
         /// <summary>Gets a unit vector in the direction of this Coord.</summary>
         public Coord UnitVector
         {
@@ -136,6 +143,7 @@ namespace ScratchUtility
                 );
             return retVal;
         }
+
         /// <summary>Returns the Dot Product of this and rhs.</summary>
         /// <param name="rhs">The right-hand-side Coord.</param>
         /// <returns>The Dot Product of this and rhs.</returns>
@@ -151,6 +159,7 @@ namespace ScratchUtility
         {
             return new PointD(X, Y);
         }
+
         /// <summary>
         /// Returns a new PointF object with this Coord's X and Y value. The Z value is eliminated.
         /// </summary>
@@ -158,6 +167,7 @@ namespace ScratchUtility
         {
             return new PointF((float)X, (float)Y);
         }
+
         public bool IsValid()
         {
             return !(double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z));

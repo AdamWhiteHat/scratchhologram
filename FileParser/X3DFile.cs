@@ -30,7 +30,7 @@ namespace FileParser
 
             StreamReader sr = new StreamReader(FullPath);
             string s = "";
-            while (s != "</head>" && !sr.EndOfStream)
+            while (!s.Contains("</head>", StringComparison.InvariantCultureIgnoreCase) && !sr.EndOfStream)
             {
                 s = sr.ReadLine();
             }

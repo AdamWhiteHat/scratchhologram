@@ -11,8 +11,6 @@ namespace ScratchUtility
         private static Matrix mModelToWindowMatrix;
         public static Matrix mWindowToModelMatrix { get; private set; }
 
-
-
         static Transformer()
         {
             mModelToWindowMatrix = new Matrix();
@@ -21,15 +19,15 @@ namespace ScratchUtility
 
         public static Matrix ModelToWindowMatrix
         {
-        		get
-        		{
-        		    return mModelToWindowMatrix;
-        		}
-        		set
-        		{
-                    mModelToWindowMatrix = value;
-                    mWindowToModelMatrix = mModelToWindowMatrix.Inverse();
-        		}
+            get
+            {
+                return mModelToWindowMatrix;
+            }
+            set
+            {
+                mModelToWindowMatrix = value;
+                mWindowToModelMatrix = mModelToWindowMatrix.Inverse();
+            }
         }
 
         //unpredictable results if windowCoord.Z != 0
@@ -43,6 +41,7 @@ namespace ScratchUtility
 
             return new Coord(result[0, 0], result[1, 0], result[2, 0]);
         }
+
         public static Coord ModelToWindow(Coord modelCoord)
         {
             Matrix toTransform = modelCoord.ToVectorCol(true);
@@ -79,7 +78,6 @@ namespace ScratchUtility
             return retVal;
         }
 
-
         public static Coord GetArcCoord(Coord locationAtZeroAngle)
         {
             //Find the Center Point of the arc:
@@ -104,7 +102,7 @@ namespace ScratchUtility
             double halfwidth = Math.Abs(center.Y - locationAtZeroAngle.Y);
             int length = Math.Max((int)(halfwidth * 2 + .5), 1);
             Rectangle r = new Rectangle((int)(center.X - halfwidth + .5), (int)(center.Y - halfwidth + .5), length, length);
-            
+
             return r;
         }
     }

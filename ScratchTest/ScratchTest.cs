@@ -16,6 +16,10 @@ namespace ScratchTest
 {
     public partial class ScratchTest : Form
     {
+        private static string OpenFileDialog_Filter = "(*.x3d)|*.x3d|All files (*.*)|*.*";
+        private static string OpenFileDialog_InitialDirectory = "C:\\Program Files\\Blender Foundation\\Blender";
+        private static string OpenFileDialog_Title = "Open a file...";
+
         public ScratchTest()
         {
             InitializeComponent();
@@ -31,44 +35,50 @@ namespace ScratchTest
             SetVisibilityMode();
             mView.SwitchLeftRight = mSwitchCheckBox.Checked;
             TrySetPointWidth();
-            SetUpFileList(@"C:\Program Files\Blender Foundation\Blender");
+            //SetUpFileList(@"C:\Program Files\Blender Foundation\Blender 4.0");
             //begin drawing
             //mView.DrawingEnabled = true;
         }
-
 
         public void SetVisibilityMode()
         {
             mView.VisibilityMode = mHiddenLineCheckBox.Checked ? ViewSupport.VisibilityMode.HiddenLine : ViewSupport.VisibilityMode.Transparent;
         }
 
-
-
         private void mArcSweepAngleTrack_Scroll(object sender, EventArgs e)
         {
-            if(!DesignMode)
+            if (!DesignMode)
+            {
                 mView.ArcSweepAngle = mArcSweepAngleTrack.Value;
+            }
         }
 
         private void mViewAngleTrack_Scroll(object sender, EventArgs e)
         {
         }
+
         private void mViewAngleTrack_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.C)
+            {
                 mViewAngleTrack.Value = 0;
+            }
         }
 
         private void mViewAngleTrack_ValueChanged(object sender, EventArgs e)
         {
             if (!DesignMode)
+            {
                 mView.ViewAngle = mViewAngleTrack.Value;
+            }
         }
 
         private void mLineResolutionTrack_Scroll(object sender, EventArgs e)
         {
             if (!DesignMode)
+            {
                 SetPointsPerUnitLength();
+            }
         }
 
         private void SetPointsPerUnitLength()
@@ -79,19 +89,27 @@ namespace ScratchTest
         private void mArcCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (!DesignMode)
+            {
                 mView.ShowArcs = mArcCheckBox.Checked;
+            }
         }
 
         private void mDebugCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (!DesignMode)
+            {
                 Global.DebugMode = mDebugCheckBox.Checked;
+            }
         }
+
         private void mPointSizeTextBox_TextChanged(object sender, EventArgs e)
         {
             if (!DesignMode)
+            {
                 TrySetPointWidth();
+            }
         }
+
         private void TrySetPointWidth()
         {
             int size = 0;
@@ -116,18 +134,28 @@ namespace ScratchTest
                 else
                 {
                     if (mRedBlueRadioButton.Checked)
+                    {
                         mView.ViewMode = ViewSupport.ViewMode.RedBlue;
+                    }
                     else if (mStereoscopicRadioButton.Checked)
+                    {
                         mView.ViewMode = ViewSupport.ViewMode.Stereoscopic;
+                    }
                     else
-                        mView.ViewMode = ViewSupport.ViewMode.Normal;
+                    {
+                    }
+                    mView.ViewMode = ViewSupport.ViewMode.Normal;
+
                 }
             }
         }
+
         private void mVisibilityMode_CheckedChanged(object sender, EventArgs e)
         {
-            if(((RadioButton)sender).Checked)
+            if (((RadioButton)sender).Checked)
+            {
                 SetVisibilityMode();
+            }
         }
 
 
@@ -140,6 +168,7 @@ namespace ScratchTest
             }
             return ret + "-1, ";
         }
+
         private string GetCoordString(params Coord[] coords)
         {
             string ret = "";
@@ -169,7 +198,6 @@ namespace ScratchTest
             return c.X + " " + c.Y + " " + c.Z + ", ";
         }
 
-
         private void LoadX3DFile(X3DFile file, double scale)
         {
             file.Parse(scale);
@@ -180,13 +208,12 @@ namespace ScratchTest
             }
             mView.PreProcessShapes();
             //mView.SetPo(file.CameraPosition);
-            
         }
 
 
         private void zf_TextChanged(object sender, EventArgs e)
         {
-            if(zf.Text == "")
+            if (zf.Text == "")
             {
                 mView.SetZf(0);
                 zfTrackBar.Value = 0;
@@ -220,52 +247,43 @@ namespace ScratchTest
 
         private void mOpenButton_Click(object sender, EventArgs e)
         {
-            mOpenFileDialog.ShowDialog();
-        }
-
-
-
-        private void mOpenFileDialog_FileOk(object sender, CancelEventArgs e)
-        {
-            HandleOpenFile(mOpenFileDialog.FileName);
-        }
-
-        private void HandleOpenFile(string fileName)
-        {
-            SetUpFileList(Path.GetDirectoryName(fileName), fileName);
-        }
-
-        private void SetUpFileList(string directory, string selectFileName)
-        {
-            mFilesComboBox.Items.Clear();
-            foreach (string fileName in Directory.GetFiles(directory, "*.x3d"))
+            mOpenFileDialog.Title = OpenFileDialog_Title;
+            mOpenFileDialog.Filter = OpenFileDialog_Filter;
+            mOpenFileDialog.InitialDirectory = OpenFileDialog_InitialDirectory;
+            if (mOpenFileDialog.ShowDialog() == DialogResult.OK)
             {
-                X3DFile f = new X3DFile(fileName);
-                mFilesComboBox.Items.Add(f);
-                if (fileName == selectFileName)
-                    mFilesComboBox.SelectedIndex = mFilesComboBox.Items.Count - 1;
+                OpenFileDialog_InitialDirectory = Path.GetDirectoryName(mOpenFileDialog.FileName);
+                OpenFile(mOpenFileDialog.FileName);
             }
         }
-        private void SetUpFileList(string directory)
-        {
-            SetUpFileList(directory, null);
-        }
 
-        private void mFilesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void OpenFile(string fileName)
         {
-            LoadX3DFile((X3DFile)(mFilesComboBox.SelectedItem), 1);
+            string fullFilePath = Path.GetFullPath(fileName);
+            labelOpenFile.Text = fullFilePath;
+
+            string ext = Path.GetExtension(fullFilePath).ToUpperInvariant();
+
+            if (ext == ".X3D")
+            {
+                X3DFile f = new X3DFile(fullFilePath);
+                LoadX3DFile(f, 1);
+            }
         }
 
         private void mVectorsCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (!DesignMode)
+            {
                 mView.VectorMode = mVectorsCheckBox.Checked;
+            }
         }
 
         private void quickModeCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ViewSupport.DrawOptions.QuickMode = quickModeCheckBox.Checked;
         }
+
         private void mHiddenLineCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             SetVisibilityMode();
@@ -275,9 +293,5 @@ namespace ScratchTest
         {
             //mView.GenerateArcs();
         }
-
-
     }
-
-    
 }

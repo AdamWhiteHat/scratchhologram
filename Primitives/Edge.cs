@@ -6,7 +6,7 @@ using ScratchUtility;
 using System.Drawing;
 
 namespace Primitives
-{ 
+{
     /// <summary>Specifies the classification of the ViewEdge.</summary>
     public enum EdgeType
     {
@@ -34,15 +34,19 @@ namespace Primitives
     {
         /// <summary>Gets the IndexedFace that created this Edge. Null for Auxiliary Faces. Knowing which Face created the Edge helps to make sense of StartVertex and EndVertex: From CreatorFace's point of view, StartVertex and EndVertex are in counter-clockwise order.</summary>
         public IndexedFace CreatorFace { get; private set; }
+
         /// <summary>Gets the Face that did not create this Edge. From OtherFace's point of view, StartVertex and EndVertex are in clockwise order instead of counter-clockwise as would be expected when looking from the point of view of the CreatorFace.</summary>
         public IndexedFace OtherFace { get; private set; }
+
         /// <summary>Gets the first Vertex supplied in the creation of this Edge. From CreatorFace's point of view, StartVertex comes before EndVertex in counter-clockwise order.</summary>
         public Vertex StartVertex { get; private set; }
+
         /// <summary>Gets the second Vertex supplied in the creation of this Edge. From CreatorFace's point of view, EndVertex comes after StartVertex in counter-clockwise order.</summary>
         public Vertex EndVertex { get; private set; }
 
         /// <summary>Specifies the classification of the ViewEdge.</summary>
         public EdgeType Type { get; private set; }
+
         /// <summary>Specifies whether or not this Edge connects two IndexedFaces, and if so, whether the Edge connection is Internal or External.</summary>
         public ConnectionType ConnectionType { get; private set; }
 
@@ -55,9 +59,7 @@ namespace Primitives
         /// <summary>Gets the Rectangle that bounds this Edge when drawn on the sceen (the Vertices' ViewCoords are used).</summary>
         public Rectangle BoundingBox { get; private set; }
 
-
         public int EdgeID { get; set; }
-
 
         public Edge(Vertex startVertex, Vertex endVertex, IndexedFace creatorFace)
         {
@@ -75,9 +77,12 @@ namespace Primitives
         public void AddFace(IndexedFace face)
         {
             if (OtherFace != null)
+            {
                 throw new Exception("Cannot set OtherFace on an Edge which already has an OtherFace");
+            }
             OtherFace = face;
         }
+
         /// <summary>Updates the ConnectionType of this Edge to accurately reflect the two IndexedFaces that it connects. No update is made if this Edge does not have an OtherFace. The ConnectionType never changes once set, so it is only necessary to call this function once. Make sure both IndexedFaces have their NormalVectors updated before calling this function.</summary>
         public void UpdateConnectionType()
         {
@@ -88,6 +93,7 @@ namespace Primitives
                 ConnectionType = Math.Sign(val) == 1 ? ConnectionType.External : ConnectionType.Internal;
             }
         }
+
         public void RefreshBoundingBox()
         {
             BoundingBox = Global.GetRectangleWithGivenCorners(StartVertex.ViewCoord.ToPointD(), EndVertex.ViewCoord.ToPointD());
@@ -104,6 +110,7 @@ namespace Primitives
         {
             return (v == StartVertex || v == EndVertex);
         }
+
         /// <summary>Returns true if the specified IndexedFace is either the CreatorFace or OtherFace of this Edge.</summary>
         public bool ContainsFace(IndexedFace ifc)
         {
@@ -117,6 +124,7 @@ namespace Primitives
                 return (EndVertex.ModelingCoord - StartVertex.ModelingCoord).Length;
             }
         }
+
         public double Length_ViewCoordinates
         {
             get
@@ -137,14 +145,20 @@ namespace Primitives
             Coord thisUnit = (EndVertex.ModelingCoord - StartVertex.ModelingCoord).UnitVector;
             Coord silhouetteUnit = (silhouetteEdge.EndVertex.ModelingCoord - silhouetteEdge.StartVertex.ModelingCoord).UnitVector;
             if (thisUnit == silhouetteUnit || thisUnit == -1 * silhouetteUnit)
+            {
                 return false;
+            }
 
             //shortcut if the intersection occurs right at the corner of silhouetteEdge and this Edge.
             if (silhouetteEdge.ContainsVertex(StartVertex) || silhouetteEdge.ContainsVertex(EndVertex))
-                return false;            
+            {
+                return false;
+            }
 
             if (!silhouetteEdge.BoundingBox.IntersectsWith(BoundingBox)) //if the BoundingBoxes don't intersect, then the Edges don't intersect
+            {
                 return false;
+            }
 
             double a = this.StartVertex.ViewCoord.X;
             double f = this.StartVertex.ViewCoord.Y;
@@ -173,7 +187,9 @@ namespace Primitives
                 double zi = this.StartVertex.ViewCoord.Z + (this.EndVertex.ViewCoord.Z - this.StartVertex.ViewCoord.Z) * t;
                 double ziSilhouette = silhouetteEdge.StartVertex.ViewCoord.Z + (silhouetteEdge.EndVertex.ViewCoord.Z - silhouetteEdge.StartVertex.ViewCoord.Z) * u;
                 if (zi > ziSilhouette) //if zi > ziSilhouette, the Silhouette Edge is behind this Edge, and thus the intersection can be ignored.
+                {
                     return false;
+                }
 
                 double xi = a + (b - a) * t;
                 double yi = f + (g - f) * t;
@@ -182,7 +198,6 @@ namespace Primitives
                 return true;
             }
         }
-
 
         public List<Coord> GetPoints(double viewPointsPerUnitLength, bool zeroAngle)
         {
@@ -203,34 +218,44 @@ namespace Primitives
             return points;
         }
 
-
-
         /// <summary>Refreshes this Edge so that its Type and BoundingBox accurately reflect the current IndexedFaceSet's AvailableViewVertexLocations.</summary>
         internal void Refresh()
         {
             //todo: check validity of what happens when there's only one edge
             if (OtherFace == null)
+            {
                 Type = EdgeType.Silhouette;
+            }
             else if (CreatorFace.IsFrontFacing && OtherFace.IsFrontFacing)
+            {
                 Type = EdgeType.FrontFacing;
+            }
             else if (!CreatorFace.IsFrontFacing && !OtherFace.IsFrontFacing)
+            {
                 Type = EdgeType.BackFacing;
+            }
             else
+            {
                 Type = EdgeType.Silhouette;
+            }
         }
 
         /// <summary>Returns the Vertex that is not the supplied Vertex. An Exception is thrown if the supplied Vertex is not either the StartVertex or EndVertex of this Edge.</summary>
         public Vertex GetOtherVertex(Vertex unwantedVertex)
         {
             if (unwantedVertex == StartVertex)
+            {
                 return EndVertex;
+            }
             else if (unwantedVertex == EndVertex)
+            {
                 return StartVertex;
+            }
             else
+            {
                 throw new Exception("Can not Get Other Vertex because the supplied unwantedVertex is not part of this Edge.");
+            }
         }
-
-
 
         public string ToDebugString()
         {

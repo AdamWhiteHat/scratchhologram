@@ -8,20 +8,19 @@ using System.Drawing.Drawing2D;
 
 namespace Primitives
 {
-    /// <summary>IndexedFace is analagous to a polygon.</summary>
+    /// <summary>IndexedFace is analogous to a polygon.</summary>
     public class IndexedFace
     {
         public IndexedFaceSet ParentIndexedFaceSet { get; private set; }
         public List<Edge> Edges { get; private set; }
         public List<Vertex> Vertices { get; private set; } //this list is in order of the way they were defined in the data file to preserve frontface/backface
+
         private Coord mNormalVector;
         private Coord mNormalVector_ModelingCoordinates;
         private bool mIsFrontFacing;
         private bool mIsTransparent;
         private Rectangle mBoundingBox;
-
         private static double mIntersectionTolerance = 0;//.01; //0.0000000000001;
-
 
         internal IndexedFace(IndexedFaceSet parentIndexedFaceSet)
         {
@@ -31,6 +30,7 @@ namespace Primitives
             mIsFrontFacing = true;
             mIsTransparent = false;
         }
+
         public Coord NormalVector_ModelingCoordinates
         {
             get
@@ -38,6 +38,7 @@ namespace Primitives
                 return mNormalVector_ModelingCoordinates;
             }
         }
+
         public Coord NormalVector
         {
             get
@@ -45,6 +46,7 @@ namespace Primitives
                 return mNormalVector;
             }
         }
+
         public bool IsFrontFacing
         {
             get
@@ -52,6 +54,7 @@ namespace Primitives
                 return mIsFrontFacing;
             }
         }
+
         public bool IsTransparent
         {
             get
@@ -63,6 +66,7 @@ namespace Primitives
                 mIsTransparent = value;
             }
         }
+
         public Rectangle BoundingBox
         {
             get
@@ -114,15 +118,18 @@ namespace Primitives
         public Coord GetDirectionVector(Edge e)
         {
             if (this == e.CreatorFace)
+            {
                 return (e.EndVertex.ViewCoord - e.StartVertex.ViewCoord);
+            }
             else if (this == e.OtherFace)
+            {
                 return (e.StartVertex.ViewCoord - e.EndVertex.ViewCoord);
+            }
             else
+            {
                 throw new Exception("Failed to get direction vector. This Face is not one of supplied Edge's Faces.");
+            }
         }
-
-
-        
 
         /// <summary>Returns true if the supplied Coord is contained within the on-screen projection of this IndexedFace. All Z values are ignored.</summary>
         public bool ContainsPoint2D(Coord c)
@@ -145,7 +152,7 @@ namespace Primitives
             ////Coord rayToDistantPoint = new Edge(c, new ViewPoint(new Coord(32768, 32768, 0))); //new Coord(BoundingBox.Right + 1, BoundingBox.Bottom + 1, 0)
 
             //Coord rayCoord = new Coord(BoundingBox.Right + 1, BoundingBox.Bottom + 1, 0);
-            
+
 
             //int crossProductSignSum = 0;
             //foreach (Edge e in Edges)
@@ -172,7 +179,7 @@ namespace Primitives
             PointF cTransformed = Transformer.ViewFromAxis(c, axisUnitVector, perpendicularUnitVector);
             return (g.IsVisible(cTransformed));
         }
-        
+
 
         /// <summary>
         /// Recalculates the NormalVector, IsFrontFacing property and BoundingBox for this IndexedFaceSet to reflect the latest AvailableViewVertexLocation data.
@@ -196,6 +203,7 @@ namespace Primitives
             mNormalVector_ModelingCoordinates += (Vertices[c - 1].ModelingCoord - Vertices[0].ModelingCoord).CrossProduct(Vertices[1].ModelingCoord - Vertices[0].ModelingCoord);
             mNormalVector_ModelingCoordinates /= mNormalVector_ModelingCoordinates.Length;
         }
+
         /// <summary>Sets the NormalVector to reflect the current view of the IndexedFace on the screen. Automatically called from Refresh().</summary>
         internal void UpdateNormalVector()
         {
@@ -216,7 +224,9 @@ namespace Primitives
                 b.Append("Invalid Normal Vector: ").AppendLine(mNormalVector.ToString());
                 b.AppendLine("Vertices: ");
                 foreach (Vertex v in Vertices)
+                {
                     b.AppendLine(v.ViewCoord.ToString());
+                }
                 System.Diagnostics.Debug.WriteLine(b.ToString());
                 //throw new Exception(b.ToString());
             }
@@ -246,16 +256,6 @@ namespace Primitives
         }
 
 
-
-
-
-
-
-
-
-
-
-
         public bool IsBetweenCameraAndPoint3D(Coord point_ViewCoordinates)
         {
             Coord cameraPoint = point_ViewCoordinates;
@@ -281,12 +281,16 @@ namespace Primitives
             intersectionPoint = new Coord();
             double uDenom = normalVector.DotProduct(point2 - point1);
             if (uDenom == 0) //the line from p2 to p1 is perpendicular to the plane's normal (i.e. parallel to plane)
+            {
                 return false;
+            }
 
             double uNum = normalVector.DotProduct(pointOnFace - point1);
             double u = uNum / uDenom;
             if (Global.IsNotWithinTolerance(u))
+            {
                 return false;
+            }
             else
             {
                 //P = P1 + u (P2 - P1)

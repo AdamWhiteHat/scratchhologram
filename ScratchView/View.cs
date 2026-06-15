@@ -18,66 +18,16 @@ namespace ScratchView
 
     public partial class View : UserControl
     {
-        private double mPaddingPercent = .1;
 
-        private Point mLastMousePosition = Drawing.NullPoint;
+        #region ViewContext Properties
 
+        public StereoscopicMode StereoscopicMode { get { return ViewContext.StereoscopicMode; } set { ViewContext.StereoscopicMode = value; } }
+        public double ViewAngle { get { return ViewContext.ViewAngle; } set { ViewContext.ViewAngle = value; } }
+        public double StereoscopicDisparityAngle { get { return ViewContext.StereoscopicDisparityAngle; } set { ViewContext.StereoscopicDisparityAngle = value; } }
 
-        public View()
-        {
-            InitializeComponent();
-
-            Drawing.SceneChanged += new SceneChangedHandler(Drawing_SceneChanged);
-
-            Global.DesignMode = DesignMode;
-
-            if(!DesignMode)
-                ViewContext.CanvasSize = this.Size;
-        }
-
-
-        //public double LongestArcRadiusPrintMode
-        //{
-        //    get { return mLongestArcRadiusPrintMode; }
-        //    set
-        //    {
-        //        if (mLongestArcRadiusPrintMode != value)
-        //        {
-        //            mLongestArcRadiusPrintMode = value;
-        //            if(mViewMode == ViewModes.Print)
-        //                Invalidate();
-        //        }
-        //    }
-        //}
-        public double PaddingPercent
-        {
-            get { return mPaddingPercent; }
-            set
-            {
-                if (mPaddingPercent != value)
-                {
-                    mPaddingPercent = value;
-                    Invalidate();
-                }
-            }
-        }
-        /// <summary>Gets a Rectangle the side of the ClientRectangle shrunk by the PaddingPercent.</summary>
-        public Rectangle FitWithin
-        {
-            get
-            {
-                Rectangle fitWithin = ClientRectangle;
-                fitWithin.Inflate(-(int)(fitWithin.Width * PaddingPercent), -(int)(fitWithin.Height * PaddingPercent));
-                return fitWithin;
-            }
-        }
-
-
-
-        //public bool DrawingEnabled { get { return Drawing.Enabled; } set { Drawing.Enabled = value; } }
+        #endregion
 
         #region DrawOption Properties
-
 
         public ViewMode ViewMode { get { return DrawOptions.ViewMode; } set { DrawOptions.ViewMode = value; } }
         public bool SwitchLeftRight { get { return DrawOptions.SwitchLeftRight; } set { DrawOptions.SwitchLeftRight = value; } }
@@ -93,13 +43,62 @@ namespace ScratchView
 
         #endregion
 
-        #region ViewContext Properties
+        private double mPaddingPercent = .1;
+        private Point mLastMousePosition = Drawing.NullPoint;
 
-        public StereoscopicMode StereoscopicMode { get { return ViewContext.StereoscopicMode; } set { ViewContext.StereoscopicMode = value; } }
-        public double ViewAngle { get { return ViewContext.ViewAngle; } set { ViewContext.ViewAngle = value; } }
-        public double StereoscopicDisparityAngle { get { return ViewContext.StereoscopicDisparityAngle; } set { ViewContext.StereoscopicDisparityAngle = value; } }
+        public View()
+        {
+            InitializeComponent();
 
-        #endregion
+            Drawing.SceneChanged += new SceneChangedHandler(Drawing_SceneChanged);
+
+            Global.DesignMode = DesignMode;
+
+            if (!DesignMode)
+            {
+                ViewContext.CanvasSize = this.Size;
+            }
+        }
+
+        //public double LongestArcRadiusPrintMode
+        //{
+        //    get { return mLongestArcRadiusPrintMode; }
+        //    set
+        //    {
+        //        if (mLongestArcRadiusPrintMode != value)
+        //        {
+        //            mLongestArcRadiusPrintMode = value;
+        //            if(mViewMode == ViewModes.Print)
+        //                Invalidate();
+        //        }
+        //    }
+        //}
+
+        public double PaddingPercent
+        {
+            get { return mPaddingPercent; }
+            set
+            {
+                if (mPaddingPercent != value)
+                {
+                    mPaddingPercent = value;
+                    Invalidate();
+                }
+            }
+        }
+
+        /// <summary>Gets a Rectangle the side of the ClientRectangle shrunk by the PaddingPercent.</summary>
+        public Rectangle FitWithin
+        {
+            get
+            {
+                Rectangle fitWithin = ClientRectangle;
+                fitWithin.Inflate(-(int)(fitWithin.Width * PaddingPercent), -(int)(fitWithin.Height * PaddingPercent));
+                return fitWithin;
+            }
+        }
+
+        //public bool DrawingEnabled { get { return Drawing.Enabled; } set { Drawing.Enabled = value; } }
 
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -157,7 +156,7 @@ namespace ScratchView
                 {
                     double flyAmount = (e.Delta < 0) ? -1 : 1;
                     if (ViewContext.SlowNavigation)
-                        flyAmount /= 10;
+                    { flyAmount /= 10; }
                     ViewContext.Fly(flyAmount);
                 }
                 else
@@ -166,19 +165,20 @@ namespace ScratchView
                     {
                         double zoomAmount = (e.Delta < 0) ? -1 : 1;
                         if (ViewContext.SlowNavigation)
-                            zoomAmount /= 10;
+                        { zoomAmount /= 10; }
                         ViewContext.Zoom(zoomAmount);
                     }
                     else if (MouseButtons == MouseButtons.None)
                     {
                         double scaleAmount = (e.Delta < 0) ? .9 : -1.1;
                         if (ViewContext.SlowNavigation)
-                            scaleAmount += .09;
+                        { scaleAmount += .09; }
                         ViewContext.Scale(Math.Abs(scaleAmount));
                     }
                 }
             }
         }
+
         private void View_MouseMove(object sender, MouseEventArgs e)
         {
             if (!DesignMode)
@@ -197,11 +197,17 @@ namespace ScratchView
                         PointD deltaMousePosition = DrawOptions.RotateCanvas ? GetDelta(mLastMousePosition, e.Location) : GetDelta(e.Location, mLastMousePosition);
 
                         if (e.Button == MouseButtons.Left)
+                        {
                             Orbit(deltaMousePosition);
+                        }
                         else if (e.Button == (MouseButtons.Left | MouseButtons.Right) || e.Button == MouseButtons.Middle)
+                        {
                             Pan(mLastMousePosition, e.Location);
+                        }
                         else if (e.Button == MouseButtons.Right)
+                        {
                             LookAround(deltaMousePosition);
+                        }
                     }
 
 
@@ -224,11 +230,13 @@ namespace ScratchView
             Coord currentMouse = new Coord(currentMouseClick.X * multiplier, currentMouseClick.Y * multiplier, 0);
             ViewContext.Pan(lastMouse, currentMouse);
         }
+
         private void Orbit(PointD deltaMousePosition)
         {
             Coord newPoLocation_ViewCoordinates = new Coord((deltaMousePosition.X * ViewContext.N.Length / 2) + (Width / 2), (deltaMousePosition.Y * ViewContext.N.Length / 2) + (Height / 2), 0);
             ViewContext.Orbit(newPoLocation_ViewCoordinates);
         }
+
         private void LookAround(PointD deltaMousePosition)
         {
             //deltaMousePosition will be a small increment.
@@ -236,18 +244,16 @@ namespace ScratchView
             ViewContext.LookAround(newPrLocation_ViewCoordinates);
         }
 
-
-
-
-
-        public void SetPo(double x, double y, double z)
+        public void SetPointOfOrigin(double x, double y, double z)
         {
-            ViewContext.Po = new Coord(x, y, z);
+            ViewContext.PointOfOrigin = new Coord(x, y, z);
         }
-        public void SetPo(Coord c)
+
+        public void SetPointOfOrigin(Coord c)
         {
-            ViewContext.Po = c;
+            ViewContext.PointOfOrigin = c;
         }
+
         public void SetZf(double zf)
         {
             ViewContext.Zf = zf;
@@ -258,23 +264,38 @@ namespace ScratchView
             if (!DesignMode)
             {
                 if (e.KeyChar == 'r' || e.KeyChar == 'R')
+                {
                     ViewContext.ResetCamera();
+                }
                 else if (e.KeyChar == 'a' || e.KeyChar == 'A')
+                {
                     DrawOptions.CanvasCutoffMode = CanvasCutoffMode.NoCutoff;
+                }
                 else if (e.KeyChar == 'f' || e.KeyChar == 'F')
+                {
                     ToggleCanvasCutoffMode(CanvasCutoffMode.ShowInFrontOnly);
+                }
                 else if (e.KeyChar == 'b' || e.KeyChar == 'B')
+                {
                     ToggleCanvasCutoffMode(CanvasCutoffMode.ShowBehindOnly);
+                }
                 else if (e.KeyChar == 'c' || e.KeyChar == 'C')
+                {
                     ToggleCanvasCutoffMode(CanvasCutoffMode.ToggleColor);
+                }
             }
         }
+
         private void ToggleCanvasCutoffMode(CanvasCutoffMode modeToToggle)
         {
             if (DrawOptions.CanvasCutoffMode == modeToToggle)
+            {
                 DrawOptions.CanvasCutoffMode = CanvasCutoffMode.NoCutoff;
+            }
             else
+            {
                 DrawOptions.CanvasCutoffMode = modeToToggle;
+            }
         }
 
         private void View_KeyDown(object sender, KeyEventArgs e)
@@ -290,8 +311,10 @@ namespace ScratchView
                 //else if (e.KeyCode == Keys.ControlKey)
                 //    ViewContext.NavigationMode = NavigationMode.UserView;
                 //else 
-                    if (e.KeyCode == Keys.ShiftKey)
+                if (e.KeyCode == Keys.ShiftKey)
+                {
                     ViewContext.SlowNavigation = false;
+                }
             }
         }
 
@@ -304,8 +327,10 @@ namespace ScratchView
                 //else if (e.KeyCode == Keys.ControlKey)
                 //    ViewContext.NavigationMode = NavigationMode.CanvasViewShowInFront;
                 //else 
-                    if (e.KeyCode == Keys.ShiftKey)
+                if (e.KeyCode == Keys.ShiftKey)
+                {
                     ViewContext.SlowNavigation = true;
+                }
             }
         }
 
@@ -319,11 +344,10 @@ namespace ScratchView
             Drawing.ClearShapes();
         }
 
-
         public void PreProcessShapes()
         {
             Drawing.PreProcessShapes();
-            ViewContext.Pr = new Coord(0, 0, 0);
+            ViewContext.PointOfReference = new Coord(0, 0, 0);
             Drawing.DoDraw = true;
         }
     }

@@ -13,21 +13,24 @@ namespace ScratchUtility
         private bool mIsNull;
 
         public PointD(double x, double y)
-            :this()
+            : this()
         {
             X = x;
             Y = y;
             mIsNull = false;
         }
+
         private PointD(bool isNull)
             : this()
         {
             mIsNull = isNull;
         }
+
         public static PointD NullPointD
         {
             get { return new PointD(true); }
         }
+
         public static bool IsNull(PointD point)
         {
             return point.mIsNull;
@@ -37,18 +40,22 @@ namespace ScratchUtility
         {
             return new PointD(c.X * rhs, c.Y * rhs);
         }
+
         public static PointD operator /(PointD c, double rhs)
         {
             return new PointD(c.X / rhs, c.Y / rhs);
         }
+
         public static PointD operator -(PointD c, PointD rhs)
         {
             return new PointD(c.X - rhs.X, c.Y - rhs.Y);
         }
+
         public static PointD operator +(PointD c, PointD rhs)
         {
             return new PointD(c.X + rhs.X, c.Y + rhs.Y);
         }
+
         public static bool operator ==(PointD a, PointD b)
         {
             // If both are null, or both are same instance, return true.
@@ -79,13 +86,16 @@ namespace ScratchUtility
                 return this == (PointD)obj;
             }
             else
+            {
                 return false;
+            }
         }
 
         public override string ToString()
         {
             return "(" + X + ", " + Y + ")";
         }
+
         public string ToString(int decimalPlaces)
         {
             return "(" + X.ToString("N" + decimalPlaces) + ", " + Y.ToString("N" + decimalPlaces) + ")";
@@ -95,6 +105,7 @@ namespace ScratchUtility
         {
             return new Point((int)X, (int)Y);
         }
+
         public PointF ToPointF()
         {
             return new PointF((float)X, (float)Y);
@@ -104,6 +115,7 @@ namespace ScratchUtility
         {
             get { return Math.Sqrt(X * X + Y * Y); }
         }
+
         /// <summary>Gets a unit vector in the direction of this PointD.</summary>
         public PointD UnitVector
         {

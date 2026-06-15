@@ -8,7 +8,6 @@ using ScratchUtility;
 
 namespace ScratchUtility
 {
-
     public class RedrawRequiredEventArgs : EventArgs
     {
         public RedrawTypeRequired RedrawTypeRequired { get; private set; }
@@ -23,41 +22,35 @@ namespace ScratchUtility
     public enum RedrawTypeRequired { None, Redraw, RecalculateViewPrimitives, RecalculateAllArcs, RecalculateArcPositionsOnly }
 
     public delegate void ViewChangedHandler(RedrawRequiredEventArgs e);
-    
+
 
     public static class ViewContext
     {
         //public bool DrawingEnabled { get; set; }
 
-        /// <summary>Gets and sets a value indicating tne closest the user can get to the point of reference when zooming in. After getting this close, Pr moves away from the user, causing the user to "fly around" instead of just zooming.</summary>
-        private static double MinNLength { get; set; }
+        //Cache the trig values used to find the ArcPoint so we don't calculate the same values for each ViewPoint being drawn.
+        public static double SinViewAngle { get; private set; }
+        public static double CosViewAngle { get; private set; }
+        public static bool SlowNavigation { get; set; }
+        public static event ViewChangedHandler ViewChanged;
 
+        /// <summary>Gets and sets a value indicating tne closest the user can get to the point of reference when zooming in. After getting this close, point of reference moves away from the user, causing the user to "fly around" instead of just zooming.</summary>
+        private static double MinNLength { get; set; }
         private static Size mCanvasSize;
         private static Coord mLookUpVector = new Coord(0, 1, 0);
-        private static Coord mPo = new Coord(1,0,0);
-        //private static Coord mPo_ViewCoordinates = new Coord();
-        private static Coord mPr = new Coord();
+        private static Coord mPointOfOrigin = new Coord(1,0,0);
+        private static Coord mPointOfReference = new Coord();
         private static double mCurrentScale;
         private static double mZf;
         private static double mN_ViewCoordinates;
         private static Coord mPreviousN;
-
         private static StereoscopicMode mStereoscopicMode = StereoscopicMode.NonStereoscopic;
         private static double mStereoscopicDisparityAngle = 8;
-
         /// <summary>BaseViewAngle is the angle that is currently set by the user. Range: -90 to 90.</summary>
         private static double mBaseViewAngle = 0;
         /// <summary>ViewAngle is the angle currently being used for drawing. In stereoscopic modes, this will be offset from mBaseViewAngle by mStereoscopicDisparityAngly.</summary>
         private static double mViewAngle = 0;
 
-        //Cache the trig values used to find the ArcPoint so we don't calculate the same values for each ViewPoint being drawn.
-        public static double SinViewAngle { get; private set; }
-        public static double CosViewAngle { get; private set; }
-
-        public static bool SlowNavigation { get; set; }
-
-        public static event ViewChangedHandler ViewChanged;
-        
         static ViewContext()
         {
             mPreviousN = N;
@@ -72,17 +65,19 @@ namespace ScratchUtility
         {
             //if (!Drawing.CurrentlyDrawing)
             //{
-                if (ViewChanged != null)
-                    ViewChanged(new RedrawRequiredEventArgs(type));
+            if (ViewChanged != null)
+            {
+                ViewChanged(new RedrawRequiredEventArgs(type));
+            }
             //}
         }
 
         public static void ResetCamera()
         {
-            //Po = new Coord(10, 15, 10);
-            //Pr = new Coord(0, 4, 0);
-            Po = new Coord(12,6,12);
-            Pr = new Coord(0,1.5,0);
+            //point of origin = new Coord(10, 15, 10);
+            //point of reference = new Coord(0, 4, 0);
+            PointOfOrigin = new Coord(12, 6, 12);
+            PointOfReference = new Coord(0, 1.5, 0);
             LookUpVector = new Coord(0, 1, 0);
             CurrentScale = 1.6;
             Zf = 25;
@@ -105,7 +100,6 @@ namespace ScratchUtility
 
                     Matrix v = n.CrossProduct(u);
 
-
                     Matrix modelToView = new Matrix();
                     modelToView[0, 0] = u[0, 0];
                     modelToView[0, 1] = u[1, 0];
@@ -117,10 +111,10 @@ namespace ScratchUtility
                     modelToView[2, 1] = n[1, 0];
                     modelToView[2, 2] = n[2, 0];
 
-                    //set initial offset (translate Po to origin) in modelToView
-                    modelToView[0, 3] = -(u[0, 0] * Po.X + u[1, 0] * Po.Y + u[2, 0] * Po.Z);
-                    modelToView[1, 3] = -(v[0, 0] * Po.X + v[1, 0] * Po.Y + v[2, 0] * Po.Z);
-                    modelToView[2, 3] = -(n[0, 0] * Po.X + n[1, 0] * Po.Y + n[2, 0] * Po.Z);
+                    //set initial offset (translate point of origin to origin) in modelToView
+                    modelToView[0, 3] = -(u[0, 0] * PointOfOrigin.X + u[1, 0] * PointOfOrigin.Y + u[2, 0] * PointOfOrigin.Z);
+                    modelToView[1, 3] = -(v[0, 0] * PointOfOrigin.X + v[1, 0] * PointOfOrigin.Y + v[2, 0] * PointOfOrigin.Z);
+                    modelToView[2, 3] = -(n[0, 0] * PointOfOrigin.X + n[1, 0] * PointOfOrigin.Y + n[2, 0] * PointOfOrigin.Z);
 
 
                     //set perspective
@@ -143,10 +137,8 @@ namespace ScratchUtility
 
                     Transformer.ModelToWindowMatrix = viewToWindow * scale * perspective * modelToView;
 
-
                     //mZf_ModelingCoordinates = WindowToModel(mPo_ViewCoordinates - new Coord(0, 0, Zf));
-                    mN_ViewCoordinates = Transformer.ModelToWindow(Pr).Z;
-
+                    mN_ViewCoordinates = Transformer.ModelToWindow(PointOfReference).Z;
 
                     FireViewChangedEvent(RedrawTypeRequired.RecalculateViewPrimitives);
                     mPreviousN = N;
@@ -193,7 +185,9 @@ namespace ScratchUtility
             set
             {
                 if (mViewAngle == value)
+                {
                     return;
+                }
                 mBaseViewAngle = value;
                 RecalculateViewAngle();
             }
@@ -208,7 +202,9 @@ namespace ScratchUtility
             set
             {
                 if (mStereoscopicDisparityAngle == value)
+                {
                     return;
+                }
                 mStereoscopicDisparityAngle = value;
                 RecalculateViewAngle();
             }
@@ -223,13 +219,14 @@ namespace ScratchUtility
             set
             {
                 if (mStereoscopicMode == value)
+                {
                     return;
+                }
                 mStereoscopicMode = value;
                 RecalculateViewAngle();
             }
         }
-        
-        
+
         public static Size CanvasSize
         {
             get { return mCanvasSize; }
@@ -237,56 +234,68 @@ namespace ScratchUtility
             {
                 if (mCanvasSize == value)
                     return;
+
                 mCanvasSize = value;
                 RecalculateMatrix();
             }
         }
+
         public static Coord LookUpVector
         {
             get { return mLookUpVector; }
             set
             {
                 if (mLookUpVector == value.UnitVector)
+                {
                     return;
+                }
                 mLookUpVector = value.UnitVector;
                 RecalculateMatrix();
             }
         }
+
         /// <summary>
         /// Gets and sets the Point of Origin (in Modeling coordinates) for this ViewContext (the point from which the user is looking at the scene)
         /// </summary>
-        public static Coord Po
+        public static Coord PointOfOrigin
         {
-            get { return mPo; }
+            get { return mPointOfOrigin; }
             set
             {
-                if (mPo == value)
+                if (mPointOfOrigin == value)
+                {
                     return;
-                mPo = value;
-                RecalculateMatrix();
-            }
-        }        
-        ///// <summary>
-        ///// Gets the Point of Origin in View coordinates for this ViewContext (Always at the center of the screen with Z = 0. Cached here for easy access)
-        ///// </summary>
-        //public static Coord Po_ViewCoordinates
-        //{
-        //    get { return mPo_ViewCoordinates; }
-        //}
-        /// <summary>
-        /// Gets and sets the Point of Reference (in Modeling coordinates) for this ViewContext (the point at which the user is looking)
-        /// </summary>
-        public static Coord Pr
-        {
-            get { return mPr; }
-            set
-            {
-                if (mPr == value) 
-                    return;
-                mPr = value;
+                }
+                mPointOfOrigin = value;
                 RecalculateMatrix();
             }
         }
+
+        ///// <summary>
+        ///// Gets the Point of Origin in View coordinates for this ViewContext (Always at the center of the screen with Z = 0. Cached here for easy access)
+        ///// </summary>
+        //public static Coord PointOfReference_ViewCoordinates
+        //{
+        //    get { return mPointOfReference_ViewCoordinates; }
+        //}
+
+        /// <summary>
+        /// Gets and sets the Point of Reference (in Modeling coordinates) for this ViewContext (the point at which the user is looking)
+        /// </summary>
+        public static Coord PointOfReference
+        {
+            get { return mPointOfReference; }
+            set
+            {
+                if (mPointOfReference == value)
+                {
+                    return;
+                }
+                mPointOfReference = value;
+                RecalculateMatrix();
+            }
+        }
+
         /// <summary>
         /// Gets and sets the current scale value for this ViewContext. A Scale of 1 is default.
         /// </summary>
@@ -296,11 +305,14 @@ namespace ScratchUtility
             set
             {
                 if (mCurrentScale == value)
+                {
                     return;
+                }
                 mCurrentScale = value;
                 RecalculateMatrix();
             }
         }
+
         /// <summary>
         /// Gets and sets the Z coordinate (in View coordinates) for the point of perspective.
         /// This point always lies along the N line away from the canvas toward the user, 
@@ -312,24 +324,27 @@ namespace ScratchUtility
             set
             {
                 if (mZf == value)
+                {
                     return;
+                }
                 mZf = value;
                 RecalculateMatrix();
             }
         }
 
         /// <summary>
-        /// Gets the N vector, which points from Pr to Po in model coordinates
+        /// Gets the N vector, which points from point of reference to point of origin in model coordinates
         /// </summary>
         public static Coord N
         {
             get
             {
-                return Po - Pr;
+                return PointOfOrigin - PointOfReference;
             }
-        }        
+        }
+
         /// <summary>
-        /// Gets the distance from the screen (Po plane) to Pr in view coordinates.
+        /// Gets the distance from the screen (point of origin plane) to point of reference in view coordinates.
         /// </summary>
         public static Double N_ViewCoordinates
         {
@@ -338,13 +353,15 @@ namespace ScratchUtility
                 return mN_ViewCoordinates;
             }
         }
-        /// <summary>Gets the location of Po in view coordinates. Always the center of the canvas with Z = 0.</summary>
-        public static Coord Po_ViewCoordinates
+
+        /// <summary>Gets the location of point of origin in view coordinates. Always the center of the canvas with Z = 0.</summary>
+        public static Coord ViewCoordinates_PointOfOrigin
         {
             get { return new Coord(mCanvasSize.Width / 2, mCanvasSize.Height / 2); }
         }
-        /// <summary>Gets the location of Pr in view coordinates. Always the center of the canvas with Z = N_ViewCoordinates.</summary>
-        public static Coord Pr_ViewCoordinates
+
+        /// <summary>Gets the location of point of reference in view coordinates. Always the center of the canvas with Z = N_ViewCoordinates.</summary>
+        public static Coord ViewCoordinates_PointOfReference
         {
             get { return new Coord(mCanvasSize.Width / 2, mCanvasSize.Height / 2, N_ViewCoordinates); }
         }
@@ -356,89 +373,94 @@ namespace ScratchUtility
 
         #endregion
 
- 
-
-
-
-        #region Maniuplation Methods
+        #region Manipulation Methods
 
         public static void Pan(Coord lastMouseClick_ViewCoordinates, Coord currentMouseClick_ViewCoordinates) //send in without converting WindowToModel();
         {
             Coord lastClick = Transformer.WindowToModel(new Coord(lastMouseClick_ViewCoordinates.X, lastMouseClick_ViewCoordinates.Y, 0));
             Coord currentClick = Transformer.WindowToModel(new Coord(currentMouseClick_ViewCoordinates.X, currentMouseClick_ViewCoordinates.Y, 0));
             Coord diff = lastClick - currentClick;
-            Po += diff;
-            Pr += diff;
+            PointOfOrigin += diff;
+            PointOfReference += diff;
         }
+
         /// <summary>
-        /// Zooms in by moving Po closer to Pr. Zooming in too much will begin to cut objects off at the Po plane. Use Scale() to enlarge the image without moving the plane.
+        /// Zooms in by moving point of origin closer to point of reference. Zooming in too much will begin to cut objects off at the point of origin plane. Use Scale() to enlarge the image without moving the plane.
         /// </summary>
-        /// <param name="zoomAmount">The number of modeling units closer (positive) or farther away (negative) to Pr to move Po. 1.5 modeling units is as close as Po can get to Pr.</param>
+        /// <param name="zoomAmount">The number of modeling units closer (positive) or farther away (negative) to point of reference to move point of origin. 1.5 modeling units is as close as point of origin can get to point of reference.</param>
         public static void Zoom(double zoomAmount)
         {
-            //move Po toward Pr (in along N)
+            //move point of origin toward point of reference (in along N)
             //if (zoomAmount > N.Length)
             //    zoomAmount = 1.5;
 
-            //multiply N's unit vector by zoomAmount to get the length along N that the new Po will be at
+            //multiply N's unit vector by zoomAmount to get the length along N that the new point of origin will be at
             Coord n = N.UnitVector;
             n *= zoomAmount;
 
-            if ((N - n).Length < 1.5) //allow Po to be a minimum of 1.5 modeling units from Pr.
-                Po = (Pr + N.UnitVector);
+            if ((N - n).Length < 1.5) //allow point of origin to be a minimum of 1.5 modeling units from point of reference.
+            {
+                PointOfOrigin = (PointOfReference + N.UnitVector);
+            }
             else
-                Po = (Po - n);
+            {
+                PointOfOrigin = (PointOfOrigin - n);
+            }
         }
+
         /// <summary>
-        /// Flies toward Pr by moving Po and Pr the same amount in the direction of the line from Po to Pr.
+        /// Flies toward point of reference by moving point of origin and point of reference the same amount in the direction of the line from point of origin to point of reference.
         /// </summary>
         /// <param name="zoomAmount"></param>
         public static void Fly(double flyAmount)
         {
-            //move Po toward Pr (in along N)
+            //move point of origin toward point of reference (in along N)
 
-            //multiply N's unit vector by zoomAmount to get the length along N that the new Po will be at
+            //multiply N's unit vector by zoomAmount to get the length along N that the new point of origin will be at
             Coord n = N.UnitVector;
             n *= flyAmount;
 
-            //n is now of the right magnitude. we need to get it back onto the N line, so add Pr's coordinates
-            Po = (Po - n);// +Pr;
+            //n is now of the right magnitude. we need to get it back onto the N line, so add point of reference's coordinates
+            PointOfOrigin = (PointOfOrigin - n);// +point of reference;
 
-            //we need to move Pr the same distance along N to simulate flying around
-            Pr = Pr - n;
+            //we need to move point of reference the same distance along N to simulate flying around
+            PointOfReference = PointOfReference - n;
         }
+
         /// <summary>
-        /// Scale the image without moving Po or Pr. Multiplies CurrentScale by the specified scale amount.
+        /// Scale the image without moving point of origin or point of reference. Multiplies CurrentScale by the specified scale amount.
         /// </summary>
         public static void Scale(double scaleAmount)
         {
             CurrentScale *= scaleAmount;
         }
+
         public static void Orbit(Coord newPoLocation_ViewCoordinates) //send in without converting WindowToModel();. Z value will be ignored because Z value is always 0.
         {
             newPoLocation_ViewCoordinates.Z = 0;
-            // Move Po - leave Pr fixed. Keep distance between Po and Pr fixed too.
+            // Move point of origin - leave point of reference fixed. Keep distance between point of origin and point of reference fixed too.
 
             Coord newPo = Transformer.WindowToModel(newPoLocation_ViewCoordinates);
 
             //newPo is in the right spot, but its N vector is now too long. Make the N vector the same size as the old N vector.
-            Coord newN = (newPo - Pr).UnitVector * N.Length;
+            Coord newN = (newPo - PointOfReference).UnitVector * N.Length;
 
-            //now put Po on that new vector.
-            Po = Pr + newN;
+            //now put point of origin on that new vector.
+            PointOfOrigin = PointOfReference + newN;
         }
+
         public static void LookAround(Coord newPrLocation_ViewCoordinates) //send in without converting WindowToModel();. Z value will be ignored because Z value is always -N_ViewCoordinates.
         {
             newPrLocation_ViewCoordinates.Z = -N_ViewCoordinates;
-            // Move Pr - leave Po fixed. Keep distance between Po and Pr fixed too.
+            // Move point of reference - leave point of origin fixed. Keep distance between point of origin and point of reference fixed too.
 
             Coord newPr = Transformer.WindowToModel(newPrLocation_ViewCoordinates);
 
             //newPr is in the right spot, but its N vector is a different size. Make the N vector the same size as the old N vector.
-            Coord newN = (Po - newPr).UnitVector * N.Length;
+            Coord newN = (PointOfOrigin - newPr).UnitVector * N.Length;
 
-            //now put Po on that new vector.
-            Pr = newN + Po;
+            //now put point of origin on that new vector.
+            PointOfReference = newN + PointOfOrigin;
         }
 
         #endregion

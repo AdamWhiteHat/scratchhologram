@@ -55,7 +55,5 @@ namespace Primitives
         {
             return IndexedFaces.Contains(ifc);
         }
-
-
     }
 }

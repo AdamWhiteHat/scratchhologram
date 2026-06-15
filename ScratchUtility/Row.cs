@@ -69,6 +69,7 @@ namespace ScratchUtility
             }
             return this;
         }
+
         /// <summary>
         /// Sets all the values of this Row to match that of the passed in Row.
         /// </summary>
@@ -77,8 +78,9 @@ namespace ScratchUtility
         public Row Fill(Row valuesToFillWith)
         {
             if (this.NumValues != valuesToFillWith.NumValues)
+            {
                 throw new Exception("The passed in Row must have the same NumValues as this Row.");
-
+            }
             for (int i = 0; i < NumValues; i++)
             {
                 values[i] = valuesToFillWith[i];
@@ -148,7 +150,10 @@ namespace ScratchUtility
             if (NumValues != r.NumValues) return false;
             for (int i = 0; i < NumValues; i++)
             {
-                if (this.GetValue(i) != r.GetValue(i)) return false;
+                if (this.GetValue(i) != r.GetValue(i))
+                {
+                    return false;
+                }
             }
             return true;
         }

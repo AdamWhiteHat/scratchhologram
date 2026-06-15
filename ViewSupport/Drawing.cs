@@ -13,7 +13,6 @@ namespace ViewSupport
 {
     public delegate void SceneChangedHandler();
 
-
     public static class Drawing
     {
         /// <summary>Specifies whether or not this class should respond to events that would cause it to be redrawn. True (should not respond to events) if a drawing operation (onto the off-screen buffer) is already occuring.</summary>
@@ -35,7 +34,7 @@ namespace ViewSupport
 
         private static Bitmap mOffScreenBitmap;
         private static Graphics mOffScreenGraphics;
-        
+
         public static event SceneChangedHandler SceneChanged;
 
         static Drawing()
@@ -71,7 +70,9 @@ namespace ViewSupport
         {
             NextRedraw = type;
             if (!CurrentlyDrawing)
+            {
                 FireSceneChangedEvent();
+            }
         }
         ///<summary>Marks the offscreen buffer as dirty and fires the ScreenChanged event causing it to be redrawn by the host.</summary>
         public static void MarkAsDirty(RedrawTypeRequired type)
@@ -88,7 +89,9 @@ namespace ViewSupport
         //    set
         //    {
         //        if (mEnabled == value)
-        //            return;
+        //       {
+        //          return;        //
+        //       }
         //        mEnabled = value;
         //        //mark as dirty if the user just toggled Enabled on.
         //        if (mEnabled)
@@ -109,7 +112,9 @@ namespace ViewSupport
             set
             {
                 if (mDoDraw == value)
+                {
                     return;
+                }
                 mDoDraw = value;
                 FireSceneChangedEvent();
             }
@@ -121,7 +126,9 @@ namespace ViewSupport
             set
             {
                 if (ViewContext.CanvasSize == value)
+                {
                     return;
+                }
                 ViewContext.CanvasSize = value;
                 mOffScreenBitmap = new Bitmap(CanvasSize.Width, CanvasSize.Height);
                 mOffScreenGraphics = Graphics.FromImage(mOffScreenBitmap);
@@ -132,17 +139,23 @@ namespace ViewSupport
             get
             {
                 if (VectorPen != null)
+                {
                     return VectorPen.Width;
+                }
                 else
+                {
                     return 0;
+                }
             }
             set
             {
                 if (VectorPen != null)
+                {
                     VectorPen.Width = value;
+                }
             }
         }
-#endregion
+        #endregion
 
 
         /// <summary>If Enabled is true, causes the internal ViewPrimitives list to be recalculated and redrawn. Returns true if the invalid and redraw events occurred successfully.</summary>
@@ -204,10 +217,6 @@ namespace ViewSupport
                 NextRedraw = RedrawTypeRequired.None;
                 CurrentlyDrawing = false;
 
-
-
-
-
                 //foreach (ViewPolygon p in ViewPolygons)
                 //{
                 //    mOffScreenGraphics.DrawRectangle(Pens.Black, Rectangle.Round(p.BoundingBox));
@@ -223,20 +232,22 @@ namespace ViewSupport
         private static void FireSceneChangedEvent()
         {
             if (SceneChanged != null && DoDraw)
+            {
                 SceneChanged();
+            }
         }
         private static void DrawNormal(Graphics g)
         {
             //if (DrawOptions.ShowArcs)
-            //    ViewPrimitives.DrawArcs(g);
+            //{
+            //  ViewPrimitives.DrawArcs(g);
+            //}
 
             if (Shapes.Count > 0)
             {
                 EdgePainter.ShapeList = Shapes;
                 EdgePainter.Draw(g);
             }
-
-            
 
             //if (DrawOptions.ShowPoints)
             //{
@@ -248,18 +259,18 @@ namespace ViewSupport
             //    {
             //        //if we're supposed to be drawing different colors for in front vs. behind, we need to draw the behind points first, change the color, then draw the in front points
             //        Brush backupBrush = PointBrush;
-
+            //
             //        PointBrush = PointBrush_BehindCanvas;
             //        DrawOptions.CanvasCutoffMode = CanvasCutoffMode.ShowBehindOnly;
             //        ViewPrimitives.Draw(g);
-
+            //
             //        PointBrush = PointBrush_InFrontOfCanvas; ;
             //        DrawOptions.CanvasCutoffMode = CanvasCutoffMode.ShowInFrontOnly;
             //        ViewPrimitives.Draw(g);
-
+            //
             //        PointBrush = backupBrush;
             //        DrawOptions.CanvasCutoffMode = CanvasCutoffMode.ToggleColor;
-
+            //
             //    }
             //}
         }
@@ -294,19 +305,19 @@ namespace ViewSupport
                 rightGraphics.Clear(rightColor);
                 g.Clear(leftColor);
 
-                ViewContext.StereoscopicMode = StereoscopicMode.Left; 
+                ViewContext.StereoscopicMode = StereoscopicMode.Left;
                 Shapes.Refresh(DrawOptions.SwitchBackFront, true);
-                    
+
                 DrawNormal(g);
 
                 ViewContext.StereoscopicMode = StereoscopicMode.Right;
                 Shapes.Refresh(DrawOptions.SwitchBackFront, true);
-                    
+
                 DrawNormal(rightGraphics);
                 ViewContext.StereoscopicMode = StereoscopicMode.NonStereoscopic;
 
                 Shapes.Refresh(DrawOptions.SwitchBackFront, true);
-                    
+
 
 
                 g.DrawImage(rightBitmap, new Rectangle(0, 0, rightBitmap.Width, rightBitmap.Height), 0, 0, rightBitmap.Width, rightBitmap.Height, GraphicsUnit.Pixel, ia);
@@ -322,9 +333,13 @@ namespace ViewSupport
 
             //offset the first direction (default left)
             if (DrawOptions.SwitchLeftRight)
+            {
                 TranslateGraphicsRight(g);
+            }
             else
+            {
                 TranslateGraphicsLeft(g);
+            }
 
             ViewContext.StereoscopicMode = StereoscopicMode.Left;
             Shapes.Refresh(DrawOptions.SwitchBackFront, true);
@@ -332,10 +347,13 @@ namespace ViewSupport
 
             //now offset the other direction (default right)
             if (DrawOptions.SwitchLeftRight)
+            {
                 TranslateGraphicsLeft(g);
+            }
             else
+            {
                 TranslateGraphicsRight(g);
-
+            }
             ViewContext.StereoscopicMode = StereoscopicMode.Right;
             Shapes.Refresh(DrawOptions.SwitchBackFront, true);
             DrawNormal(g);
@@ -354,7 +372,7 @@ namespace ViewSupport
             Size canvasSize = ViewContext.CanvasSize;
             g.ResetTransform();
             g.ResetClip();
-            g.SetClip(new Rectangle(0,0,canvasSize.Width / 2, canvasSize.Height));
+            g.SetClip(new Rectangle(0, 0, canvasSize.Width / 2, canvasSize.Height));
             ShrinkGraphics(g);
             g.TranslateTransform(-canvasSize.Width / 4, 0, MatrixOrder.Append);
         }
@@ -400,7 +418,7 @@ namespace ViewSupport
 
             //        foreach(ViewPoint vp in viewPrimitives)
             //            if (vp.BaseVoxel.IsEndPoint)
-            //                vp.DrawArc(g, pPen);
+            //           {     vp.DrawArc(g, pPen);}
 
             //    }
             //}
@@ -429,24 +447,22 @@ namespace ViewSupport
             //}
         }
 
-
-
-
         //private static void DrawPoints(Graphics g, Color pointColor, ViewPrimitiveList viewPrimitives, bool forceSpecifiedColor)
         //{
         //            foreach (ViewPrimitive vp in viewPrimitives)
         //            {
         //                if (vp.BasePrimitive.DrawAsVector || DrawAllAsVectors)
-        //                    DrawAsVector(g, vp, pointColor, forceSpecifiedColor);
+        //                {
+        //                      DrawAsVector(g, vp, pointColor, forceSpecifiedColor);
+        //                }
         //                else
-        //                    vp.DrawPoints(g, pBrush);
+        //                {
+        //                  vp.DrawPoints(g, pBrush);
+        //                }
         //            }
         //        }
         //    }
         //}
-
-
-        
 
         ///// <summary>Rotates a ViewPoint 180 degrees about another ViewPoint.</summary>
         //private static void RotatePoint(ViewPoint stationaryPoint, ViewPoint pointToRotate)
@@ -466,7 +482,7 @@ namespace ViewSupport
         //    CutOffLineAtXValue(endPoint, startPoint, ViewContext.CanvasSize.Width);
         //    CutOffLineAtYValue(startPoint, endPoint, ViewContext.CanvasSize.Height);
         //    CutOffLineAtYValue(endPoint, startPoint, ViewContext.CanvasSize.Height);
-
+        //
         //    return true;
         //}
 
@@ -477,16 +493,17 @@ namespace ViewSupport
         //    {
         //        double lengthOfX = Math.Abs(anotherPointOnLine.Location.X) + Math.Abs(pointToCutOff.Location.X);
         //        double validPercent = (Math.Abs(anotherPointOnLine.Location.X) + xValue) / lengthOfX;
-
+        //
         //        double shiftX = -anotherPointOnLine.Location.X;
         //        double shiftY = -anotherPointOnLine.Location.Y;
         //        double shiftZ = -anotherPointOnLine.Location.Z;
-
+        //
         //        pointToCutOff.Location.X = ((pointToCutOff.Location.X + shiftX) * validPercent - shiftX);
         //        pointToCutOff.Location.Y = ((pointToCutOff.Location.Y + shiftY) * validPercent - shiftY);
         //        pointToCutOff.Location.Z = ((pointToCutOff.Location.Z + shiftZ) * validPercent - shiftZ);
         //    }
         //}
+
         //private static void CutOffLineAtYValue(ViewPoint pointToCutOff, ViewPoint anotherPointOnLine, double yValue)
         //{
         //    //...if yValue is between the two points
@@ -494,11 +511,11 @@ namespace ViewSupport
         //    {
         //        double lengthOfY = Math.Abs(anotherPointOnLine.Location.Y) + Math.Abs(pointToCutOff.Location.Y);
         //        double validPercent = (Math.Abs(anotherPointOnLine.Location.Y) + yValue) / lengthOfY;
-
+        //
         //        double shiftX = -anotherPointOnLine.Location.X;
         //        double shiftY = -anotherPointOnLine.Location.Y;
         //        double shiftZ = -anotherPointOnLine.Location.Z;
-
+        //
         //        pointToCutOff.Location.X = ((pointToCutOff.Location.X + shiftX) * validPercent - shiftX);
         //        pointToCutOff.Location.Y = ((pointToCutOff.Location.Y + shiftY) * validPercent - shiftY);
         //        pointToCutOff.Location.Z = ((pointToCutOff.Location.Z + shiftZ) * validPercent - shiftZ);
@@ -516,37 +533,37 @@ namespace ViewSupport
         ///// <summary>Sets VoxelToViewPointMatrix such that the specified Primitives list will fit exactly within the specified Rectangle.</summary>
         //public static void AutoFitWithin(Rectangle fitWithin, PrimitiveList primitives)
         //{
-        //    //if (primitives.Count > 0)
-        //    //{
-        //    //    Rectangle boundingRect = Rectangle.Round(new ViewPointList(primitives).BoundingRect);
-        //    //    double currentAspectRatio = fitWithin.Width / (double)fitWithin.Height;
-        //    //    double desiredAspectRatio = boundingRect.Width / (double)boundingRect.Height;
-
-        //    //    if (currentAspectRatio > desiredAspectRatio)
-        //    //    {
-        //    //        //Too wide. We need to adjust the left and right.
-        //    //        int desiredWidth = (int)(fitWithin.Height * desiredAspectRatio);
-        //    //        int dx = (int)((desiredWidth - fitWithin.Width) / 2);
-        //    //        fitWithin.X -= dx;
-        //    //        fitWithin.Width = desiredWidth;
-        //    //    }
-        //    //    else
-        //    //    {
-        //    //        //Too tall. We need to adjust the top and bottom.
-        //    //        int desiredHeight = (int)(fitWithin.Width / desiredAspectRatio);
-        //    //        int dy = (int)((desiredHeight - fitWithin.Height) / 2);
-        //    //        fitWithin.Y -= dy;
-        //    //        fitWithin.Height = desiredHeight;
-        //    //    }
-
-        //    //    ViewContext.FitToScreenMatrix2D = new System.Drawing.Drawing2D.Matrix();
-        //    //    ViewContext.FitToScreenMatrix2D.Translate(fitWithin.X, fitWithin.Y);
-        //    //    ViewContext.FitToScreenMatrix2D.Scale(fitWithin.Width / (float)boundingRect.Width, fitWithin.Height / (float)boundingRect.Height);
-        //    //    ViewContext.FitToScreenMatrix2D.Translate(-boundingRect.X, -boundingRect.Y);
-        //    //}
+        //    if (primitives.Count > 0)
+        //    {
+        //        Rectangle boundingRect = Rectangle.Round(new ViewPointList(primitives).BoundingRect);
+        //        double currentAspectRatio = fitWithin.Width / (double)fitWithin.Height;
+        //        double desiredAspectRatio = boundingRect.Width / (double)boundingRect.Height;
+        //
+        //        if (currentAspectRatio > desiredAspectRatio)
+        //        {
+        //            //Too wide. We need to adjust the left and right.
+        //            int desiredWidth = (int)(fitWithin.Height * desiredAspectRatio);
+        //            int dx = (int)((desiredWidth - fitWithin.Width) / 2);
+        //            fitWithin.X -= dx;
+        //            fitWithin.Width = desiredWidth;
+        //        }
+        //        else
+        //        {
+        //            //Too tall. We need to adjust the top and bottom.
+        //            int desiredHeight = (int)(fitWithin.Width / desiredAspectRatio);
+        //            int dy = (int)((desiredHeight - fitWithin.Height) / 2);
+        //            fitWithin.Y -= dy;
+        //            fitWithin.Height = desiredHeight;
+        //        }
+        //
+        //        ViewContext.FitToScreenMatrix2D = new System.Drawing.Drawing2D.Matrix();
+        //        ViewContext.FitToScreenMatrix2D.Translate(fitWithin.X, fitWithin.Y);
+        //        ViewContext.FitToScreenMatrix2D.Scale(fitWithin.Width / (float)boundingRect.Width, fitWithin.Height / (float)boundingRect.Height);
+        //        ViewContext.FitToScreenMatrix2D.Translate(-boundingRect.X, -boundingRect.Y);
+        //    }
         //}
 
-        
+
 
 
 
@@ -585,8 +602,9 @@ namespace ViewSupport
             if (DoDraw)
             {
                 if (NextRedraw != RedrawTypeRequired.None)
+                {
                     ReDraw();
-
+                }
                 g.ResetTransform();
                 if (DrawOptions.RotateCanvas)
                 {

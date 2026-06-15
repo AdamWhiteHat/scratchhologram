@@ -8,7 +8,7 @@ namespace ViewSupport
 {
     public enum ViewMode { Normal, RedBlue, Stereoscopic, Print }
     public enum VisibilityMode { Transparent, HiddenLine }
-    
+
     /// <summary>Specifies whether or not points in front of / behind the canvas should be shown, or if they should be colored differently.</summary>
     public enum CanvasCutoffMode { NoCutoff, ShowBehindOnly, ShowInFrontOnly, ToggleColor }
 
@@ -21,7 +21,7 @@ namespace ViewSupport
         private static CanvasCutoffMode mCanvasCutoffMode = CanvasCutoffMode.NoCutoff;
         private static bool mSwitchLeftRight = false;
         private static bool mSwitchBackFront = false;
-        private static double mPointWidth = 5; 
+        private static double mPointWidth = 5;
         private static bool mShowArcs = true;
         private static bool mVectorMode = true;
         private static VisibilityMode mVisibilityMode = VisibilityMode.Transparent;
@@ -52,7 +52,9 @@ namespace ViewSupport
             if (!Drawing.CurrentlyDrawing)
             {
                 if (DrawOptionChanged != null)
+                {
                     DrawOptionChanged(new RedrawRequiredEventArgs(type));
+                }
             }
         }
         private static void FireOptionChangedEvent()
@@ -70,7 +72,9 @@ namespace ViewSupport
             set
             {
                 if (mVisibilityMode == value)
+                {
                     return;
+                }
                 mVisibilityMode = value;
                 FireOptionChangedEvent();
             }
@@ -85,7 +89,9 @@ namespace ViewSupport
             set
             {
                 if (mVectorMode == value)
+                {
                     return;
+                }
                 mVectorMode = value;
                 FireOptionChangedEvent();
             }
@@ -99,12 +105,14 @@ namespace ViewSupport
             set
             {
                 if (mShowArcs == value)
+                {
                     return;
+                }
                 mShowArcs = value;
                 FireOptionChangedEvent();
             }
         }
-        
+
         public static double PointWidth
         {
             get
@@ -114,7 +122,9 @@ namespace ViewSupport
             set
             {
                 if (mPointWidth == value)
+                {
                     return;
+                }
                 mPointWidth = value;
                 FireOptionChangedEvent();
             }
@@ -128,7 +138,9 @@ namespace ViewSupport
             set
             {
                 if (mArcAngleResolution == value)
+                {
                     return;
+                }
                 mArcAngleResolution = value;
                 FireOptionChangedEvent(RedrawTypeRequired.RecalculateAllArcs);
             }
@@ -142,7 +154,9 @@ namespace ViewSupport
             set
             {
                 if (mArcSweepAngle == value)
+                {
                     return;
+                }
                 mArcSweepAngle = value;
                 FireOptionChangedEvent(RedrawTypeRequired.RecalculateAllArcs);
             }
@@ -157,7 +171,9 @@ namespace ViewSupport
             set
             {
                 if (mCanvasCutoffMode == value)
+                {
                     return;
+                }
                 mCanvasCutoffMode = value;
                 FireOptionChangedEvent(RedrawTypeRequired.Redraw);
             }
@@ -171,7 +187,9 @@ namespace ViewSupport
             set
             {
                 if (mSwitchLeftRight == value)
+                {
                     return;
+                }
                 mSwitchLeftRight = value;
                 FireOptionChangedEvent();
             }
@@ -185,7 +203,9 @@ namespace ViewSupport
             set
             {
                 if (mSwitchBackFront == value)
+                {
                     return;
+                }
                 mSwitchBackFront = value;
                 FireOptionChangedEvent(RedrawTypeRequired.RecalculateViewPrimitives);
             }
@@ -199,7 +219,9 @@ namespace ViewSupport
             set
             {
                 if (mViewMode == value)
+                {
                     return;
+                }
                 mViewMode = value;
                 FireOptionChangedEvent();
             }
@@ -218,7 +240,9 @@ namespace ViewSupport
             set
             {
                 if (mViewPointsPerUnitLength == value)
+                {
                     return;
+                }
                 mViewPointsPerUnitLength = value;
                 FireOptionChangedEvent(RedrawTypeRequired.RecalculateViewPrimitives);
             }
@@ -231,8 +255,9 @@ namespace ViewSupport
             set
             {
                 if (mRotateCanvas == value)
+                {
                     return;
-
+                }
                 mRotateCanvas = value;
                 FireOptionChangedEvent();
             }
@@ -243,17 +268,15 @@ namespace ViewSupport
             set
             {
                 if (mQuickMode == value)
+                {
                     return;
-
+                }
                 mQuickMode = value;
                 FireOptionChangedEvent();
             }
         }
 
-
-
         #endregion
-
 
     }
 }

@@ -24,6 +24,8 @@ namespace Primitives
         /// <summary>Gets the Vertex in this IndexedFaceSet that is nearest the user.</summary>
         public Vertex NearestVertex { get; private set; }
 
+        static int edgeID = 0;
+
         /// <summary>
         /// Creates a new IndexedFaceSet
         /// </summary>
@@ -62,7 +64,9 @@ namespace Primitives
             {
                 string[] vals = indices[i].TrimStart().Split(' ');
                 if (vals.Length < 4) //we're ignoring the last value (seems to always be -1), so there has to be a total of at least 4 values for a triangular IndexedFace
+                {
                     throw new Exception("Can not create an IndexedFace from less than 3 Vertices");
+                }
 
                 IndexedFace indexedFace = new IndexedFace(this);
                 Vertex firstVertex = GetExistingVertex(Vertices[int.Parse(vals[0])].ModelingCoord);
@@ -77,17 +81,22 @@ namespace Primitives
                     {
                         Edge e = GetNewOrExistingEdge(previousVertex, currentVertex, indexedFace);
                         if (e.CreatorFace != indexedFace && e.OtherFace == null) //if this edge was an existing edge, we need to update it so it knows that it's now a part of a new IndexedFace
+                        {
                             e.AddFace(indexedFace);
-
+                        }
                         indexedFace.Edges.Add(e);
 
                         //make sure the Vertices know that they are now part of the new edge, if they don't already know.
                         if (!previousVertex.Edges.Contains(e))
+                        {
                             previousVertex.Edges.Add(e);
+                        }
                         //else
                         //    throw new Exception("how did that edge already know about me?");
                         if (!currentVertex.Edges.Contains(e))
+                        {
                             currentVertex.Edges.Add(e);
+                        }
                         //else
                         //    throw new Exception("how did that edge already know about me?");
 
@@ -100,20 +109,27 @@ namespace Primitives
                         Console.WriteLine("hi");
                     }
                 }
+
                 //add the Edge that finishes this IndexedFace
                 Edge finalEdge = GetNewOrExistingEdge(previousVertex, firstVertex, indexedFace);
                 if (finalEdge.CreatorFace != indexedFace) //if this edge was an existing edge, we need to update it so it knows that it's now a part of a new IndexedFace
+                {
                     finalEdge.AddFace(indexedFace);
+                }
 
                 indexedFace.Edges.Add(finalEdge);
 
                 //update the first and last Vertex to so that they know about the Edge that was just added
                 if (!indexedFace.Vertices[0].Edges.Contains(finalEdge))
+                {
                     indexedFace.Vertices[0].Edges.Add(finalEdge);
+                }
                 if (!indexedFace.Vertices[indexedFace.Vertices.Count - 1].Edges.Contains(finalEdge))
+                {
                     indexedFace.Vertices[indexedFace.Vertices.Count - 1].Edges.Add(finalEdge);
+                }
 
-                indexedFace.IsTransparent = (int.Parse(vals[vals.Length-1]) == 0);
+                indexedFace.IsTransparent = (int.Parse(vals[vals.Length - 1]) == 0);
 
                 //we're now ready to set the Normal Vectors for the IndexedFace
                 indexedFace.UpdateNormalVector();
@@ -129,16 +145,16 @@ namespace Primitives
             }
         }
 
-        static int edgeID = 0;
-
         /// <summary>Creates and returns a new or returns an existing Edge with the specified Vertices. If a new Edge is created, its CreatorIndexedFace will be set to the passed in IndexedFace.</summary>
         private Edge GetNewOrExistingEdge(Vertex v1, Vertex v2, IndexedFace creatorIndexedFace)
         {
             Edge newEdge = new Edge(v1, v2, creatorIndexedFace);
-            foreach(Edge e in Edges)
+            foreach (Edge e in Edges)
             {
                 if (e.ContainsSameVerticesAs(newEdge))
+                {
                     return e;
+                }
             }
             //if this is a new edge (which it is if we didn't find one with the same vertices), add it to the master collection
             newEdge.EdgeID = edgeID;
@@ -151,7 +167,6 @@ namespace Primitives
         {
             return Vertices.Find(v => v.ModelingCoord == modelingCoord);
         }
-
 
         /// <summary>Recalculates the AvailableViewVertexLocations for this IndexedFaceSet based on the current Transformation matrix. Also updates the IndexedFaces and Edges accordingly.</summary>
         //internal void Refresh()
@@ -170,10 +185,12 @@ namespace Primitives
                 Vertex newVertex = Vertices[AvailableViewVertexLocations_ZeroAngle.Count - 1];
                 //check if the new vertex is now the nearest vertex
                 if (NearestVertex == null || newVertex.ViewCoord.Z > NearestVertex.ViewCoord.Z) //nearer Vertices have higher Z values (less negative)
+                {
                     NearestVertex = newVertex;
+                }
             }
             RefreshArcLocationsOnly(switchBackFront);
-            
+
         }
 
         /// <summary>Refreshes only the AvailableViewVertexLocation list by using the stored zero-angle values to determine where each Coord is along its arc.</summary>
@@ -187,7 +204,9 @@ namespace Primitives
             {
                 AvailableViewVertexLocations.Clear();
                 for (int i = 0; i < AvailableViewVertexLocations_ZeroAngle.Count; i++)
+                {
                     AvailableViewVertexLocations.Add(Transformer.GetArcCoord(AvailableViewVertexLocations_ZeroAngle[i]));
+                }
             }
 
             //update whether faces are front or back facing because a face may have moved to the other side of the object
@@ -198,7 +217,9 @@ namespace Primitives
 
             //update the edge type because an edge might have moved to the other side of the object
             foreach (Edge e in Edges)
+            {
                 e.Refresh();
+            }
         }
     }
 }

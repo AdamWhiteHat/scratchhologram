@@ -18,8 +18,10 @@ namespace ScratchUtility
         /// <summary>
         /// Initializes a 4x4 identity Matrix.
         /// </summary>
-        public Matrix():
-            this(4){}
+        public Matrix() :
+            this(4)
+        {
+        }
 
         /// <summary>
         /// Initializes a square identity Matrix with the specified number of rows and columns.
@@ -98,7 +100,7 @@ namespace ScratchUtility
             Fill(0);
             for (int i = 0; i < NumRows; i++)
             {
-                if(i < NumCols)
+                if (i < NumCols)
                     rows[i][i] = 1;
             }
             return this;
@@ -186,6 +188,7 @@ namespace ScratchUtility
             }
             return this;
         }
+
         /// <summary>
         /// Sets all the values of this Matrix to match that of the passed in Matrix.
         /// </summary>
@@ -196,7 +199,7 @@ namespace ScratchUtility
             if (this.NumRows != valuesToFillWith.NumRows || this.NumCols != valuesToFillWith.NumCols)
                 throw new Exception("The passed in Matrix must have the same dimensions as this Matrix.");
 
-            for(int i = 0; i < rows.Length; i++)
+            for (int i = 0; i < rows.Length; i++)
             {
                 rows[i].Fill(valuesToFillWith[i]);
             }
@@ -218,7 +221,6 @@ namespace ScratchUtility
             }
             return true;
         }
-
 
         /// <summary>
         /// Returns the Matrix's hash-code.
@@ -368,8 +370,10 @@ namespace ScratchUtility
         /// <returns>The Cross Product of this and rhs.</returns>
         public Matrix CrossProduct(Matrix rhs)
         {
-            if(this.NumCols != 1 || this.NumRows != 3 || rhs.NumCols != 1 || rhs.NumRows != 3)
+            if (this.NumCols != 1 || this.NumRows != 3 || rhs.NumCols != 1 || rhs.NumRows != 3)
+            {
                 throw new Exception("CrossProduct is only defined for 3x1 Matrices");
+            }
 
             Matrix retVal = new Matrix(3, 1);
             retVal[0, 0] = this[1, 0] * rhs[2, 0] - this[2, 0] * rhs[1, 0];
@@ -383,13 +387,13 @@ namespace ScratchUtility
         {
             get
             {
-                double norm = 0; 
+                double norm = 0;
                 for (int i = 0; i < NumRows; i++)
                 {
                     for (int j = 0; j < NumCols; j++)
                     {
                         //square the value
-                        norm += this[i, j] * this[i, j]; 
+                        norm += this[i, j] * this[i, j];
                     }
                 }
                 return Math.Sqrt(norm);
@@ -485,18 +489,20 @@ namespace ScratchUtility
         public double Determinant()
         {
             if (NumRows != NumCols)
+            {
                 throw new Exception("Can not find the Determinants of a non-square Matrix");
-
+            }
             if (NumRows == 1)
+            {
                 return this[0, 0]; //the determinant of a 1x1 matrix is its only value.
-
+            }
             double det = 0;
             for (int i = 0; i < NumCols; i++)
             {
                 //add (sign = 1) determinants of odd-numbered (1-based indexed) Columns
                 //subtract (sign = -1) determinants of even-numbered (1-based indexed) Columns
                 int sign = ((i + 1) % 2) * 2 - 1;
-                det += this[0,i] * this.SubMatrix(i).Determinant() * sign;
+                det += this[0, i] * this.SubMatrix(i).Determinant() * sign;
             }
             return det;
         }
@@ -507,8 +513,9 @@ namespace ScratchUtility
         private Matrix SubMatrix(int colToExclude)
         {
             if (NumRows < 2 || NumCols < 2)
+            {
                 throw new Exception("SubMatrix is not defined for Matrices with less than 2 Rows or Columns");
-
+            }
             Matrix m = new Matrix(NumRows - 1, NumCols - 1);
 
             int skipNumCols = 0; //don't skip any columns initially
@@ -618,7 +625,10 @@ namespace ScratchUtility
                     }
                     b.Append("  ]");
 
-                    if (i < (NumRows - 1)) b.AppendLine();
+                    if (i < (NumRows - 1))
+                    {
+                        b.AppendLine();
+                    }
                 }
             }
             else
@@ -648,8 +658,9 @@ namespace ScratchUtility
         public Matrix Translate(double offsetX, double offsetY, double offsetZ)
         {
             if (NumRows != 4 || NumCols != 4)
+            {
                 throw new Exception("Translate operation only applies to 4x4 Matrices.");
-
+            }
             Matrix translateMatrix = new Matrix(4);
             translateMatrix[0, 3] = offsetX;
             translateMatrix[1, 3] = offsetY;
@@ -663,8 +674,9 @@ namespace ScratchUtility
         public Matrix Scale(double scaleX, double scaleY, double scaleZ)
         {
             if (NumRows != 4 || NumCols != 4)
+            {
                 throw new Exception("Scale operation only applies to 4x4 Matrices.");
-
+            }
             Matrix translateMatrix = new Matrix(4);
             translateMatrix[0, 0] = scaleX;
             translateMatrix[1, 1] = scaleY;
@@ -674,7 +686,6 @@ namespace ScratchUtility
             Fill(result);
             return this;
         }
-
 
     }
 }
