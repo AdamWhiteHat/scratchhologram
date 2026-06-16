@@ -28,75 +28,7 @@ namespace ScratchUtility
             Z = 0;
         }
 
-        public static Coord operator *(Coord c, double rhs)
-        {
-            return new Coord(c.X * rhs, c.Y * rhs, c.Z * rhs);
-        }
 
-        public static Coord operator *(double lhs, Coord c)
-        {
-            return c * lhs;
-        }
-
-        public static Coord operator /(Coord c, double rhs)
-        {
-            return new Coord(c.X / rhs, c.Y / rhs, c.Z / rhs);
-        }
-
-        public static Coord operator -(Coord c, Coord rhs)
-        {
-            return new Coord(c.X - rhs.X, c.Y - rhs.Y, c.Z - rhs.Z);
-        }
-
-        public static Coord operator +(Coord c, Coord rhs)
-        {
-            return new Coord(c.X + rhs.X, c.Y + rhs.Y, c.Z + rhs.Z);
-        }
-
-        public static bool operator ==(Coord a, Coord b)
-        {
-            // If both are null, or both are same instance, return true.
-            if (System.Object.ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            // If one is null, but not both, return false.
-            if (((object)a == null) || ((object)b == null))
-            {
-                return false;
-            }
-
-            // Return true if the fields match:
-            return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
-        }
-
-        public static bool operator !=(Coord a, Coord b)
-        {
-            return !(a == b);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj.GetType() == typeof(Coord))
-            {
-                return this == (Coord)obj;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public override string ToString()
-        {
-            return "(" + X + ", " + Y + ", " + Z + ")";
-        }
-
-        public string ToString(int decimalPlaces)
-        {
-            return "(" + X.ToString("N" + decimalPlaces) + ", " + Y.ToString("N" + decimalPlaces) + ", " + Z.ToString("N" + decimalPlaces) + ")";
-        }
 
         public Matrix ToVectorCol(bool includeBottom1)
         {
@@ -171,6 +103,84 @@ namespace ScratchUtility
         public bool IsValid()
         {
             return !(double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z));
+        }
+
+        public Coord Clone(int precision)
+        {
+            return new Coord(
+                Math.Round(this.X, precision),
+                Math.Round(this.Y, precision),
+                Math.Round(this.Z, precision));
+        }
+
+        public static Coord operator *(Coord c, double rhs)
+        {
+            return new Coord(c.X * rhs, c.Y * rhs, c.Z * rhs);
+        }
+
+        public static Coord operator *(double lhs, Coord c)
+        {
+            return c * lhs;
+        }
+
+        public static Coord operator /(Coord c, double rhs)
+        {
+            return new Coord(c.X / rhs, c.Y / rhs, c.Z / rhs);
+        }
+
+        public static Coord operator -(Coord c, Coord rhs)
+        {
+            return new Coord(c.X - rhs.X, c.Y - rhs.Y, c.Z - rhs.Z);
+        }
+
+        public static Coord operator +(Coord c, Coord rhs)
+        {
+            return new Coord(c.X + rhs.X, c.Y + rhs.Y, c.Z + rhs.Z);
+        }
+
+        public static bool operator ==(Coord a, Coord b)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(a, b))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
+        }
+
+        public static bool operator !=(Coord a, Coord b)
+        {
+            return !(a == b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() == typeof(Coord))
+            {
+                return this == (Coord)obj;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override string ToString()
+        {
+            return "(" + X + ", " + Y + ", " + Z + ")";
+        }
+
+        public string ToString(int decimalPlaces)
+        {
+            return "(" + X.ToString("N" + decimalPlaces) + ", " + Y.ToString("N" + decimalPlaces) + ", " + Z.ToString("N" + decimalPlaces) + ")";
         }
     }
 }

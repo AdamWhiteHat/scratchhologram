@@ -11,12 +11,13 @@ using ScratchUtility;
 using System.IO;
 using System.Xml;
 using FileParser;
+using System.Windows.Forms.Design;
 
 namespace ScratchTest
 {
     public partial class ScratchTest : Form
     {
-        private static string OpenFileDialog_Filter = "(*.x3d)|*.x3d|All files (*.*)|*.*";
+        private static string OpenFileDialog_Filter = "X3D Files (*.x3d)|*.x3d|STL Files(*.stl)|*.stl|All files (*.*)|*.*";
         private static string OpenFileDialog_InitialDirectory = "C:\\Program Files\\Blender Foundation\\Blender";
         private static string OpenFileDialog_Title = "Open a file...";
 
@@ -198,11 +199,10 @@ namespace ScratchTest
             return c.X + " " + c.Y + " " + c.Z + ", ";
         }
 
-        private void LoadX3DFile(X3DFile file, double scale)
+        private void LoadIFS(List<IndexedFaceSet> indexedFaceSets)
         {
-            file.Parse(scale);
             mView.ClearShapes();
-            foreach (IndexedFaceSet ifs in file.IndexedFaces)
+            foreach (IndexedFaceSet ifs in indexedFaceSets)
             {
                 mView.AddShape(ifs);
             }
@@ -266,9 +266,15 @@ namespace ScratchTest
 
             if (ext == ".X3D")
             {
-                X3DFile f = new X3DFile(fullFilePath);
-                LoadX3DFile(f, 1);
+                var ifs = X3DFile.Parse(fullFilePath, 1);
+                LoadIFS(ifs);
             }
+            else if (ext == ".STL")
+            {
+                var ifs = STLFile.Parse(fullFilePath);
+                LoadIFS(ifs);
+            }
+
         }
 
         private void mVectorsCheckBox_CheckedChanged(object sender, EventArgs e)

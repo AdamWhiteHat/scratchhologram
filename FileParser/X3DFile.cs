@@ -9,35 +9,21 @@ using ScratchUtility;
 
 namespace FileParser
 {
-    public class X3DFile
+    public static class X3DFile
     {
-        public string Name { get; set; }
-        public string FullPath { get; set; }
-
-        public List<IndexedFaceSet> IndexedFaces { get; set; }
-        public Coord CameraPosition { get; set; }
-
-        public X3DFile(string fullPath)
-        {
-            Name = Path.GetFileNameWithoutExtension(fullPath);
-            FullPath = fullPath;
-        }
+        public static Coord CameraPosition { get; set; }
 
         /// <summary>Parses the x3d file that this X3dFile represents and extracts the IndexedFaces and CameraPosition.</summary>
-        public void Parse(double scale)
+        public static List<IndexedFaceSet> Parse(string fullPath, double scale)
         {
-            IndexedFaces = new List<IndexedFaceSet>();
+            List<IndexedFaceSet> results = new List<IndexedFaceSet>();
 
-            StreamReader sr = new StreamReader(FullPath);
+            StreamReader sr = new StreamReader(fullPath);
             string s = "";
             while (!s.Contains("</head>", StringComparison.InvariantCultureIgnoreCase) && !sr.EndOfStream)
             {
                 s = sr.ReadLine();
             }
-            //while (f.CanRead)
-            //{
-            //    f.read
-            //}
 
             XmlTextReader reader = new XmlTextReader(sr);
 
@@ -67,27 +53,22 @@ namespace FileParser
                         {
                             string[] camera = reader["position"].Split(' ');
                             CameraPosition = new Coord(double.Parse(camera[1]) * scale, double.Parse(camera[2]) * scale, -double.Parse(camera[0]) * scale);
-                            //CameraPosition = new Coord(double.Parse(camera[0]) * scale, double.Parse(camera[1]) * scale, double.Parse(camera[2]) * scale);
                         }
                         break;
                 }
 
-
                 if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "IndexedFaceSet")
                 {
                     IndexedFaceSet ifs = new IndexedFaceSet(name, coordIndices, points, scale);
-                    IndexedFaces.Add(ifs);
+                    results.Add(ifs);
                 }
                 if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "Scene")
                 {
                     break;
                 }
             }
-        }
 
-        public override string ToString()
-        {
-            return Name;
+            return results;
         }
     }
 }
